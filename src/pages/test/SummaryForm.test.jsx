@@ -1,5 +1,6 @@
 import SummaryForm from "../summary/SummaryForm";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 test("initial conditions", () => {
   render(<SummaryForm />);
@@ -13,7 +14,9 @@ test("initial conditions", () => {
   expect(checkbox).not.toBeChecked();
 });
 
-test("buttons turns disabled property when toggle checkbox", () => {
+test("buttons turns disabled property when toggle checkbox", async () => {
+  const user = userEvent.setup();
+
   render(<SummaryForm />);
 
   const confirmButton = screen.getByRole("button", { name: "Confirm Order" });
@@ -21,11 +24,32 @@ test("buttons turns disabled property when toggle checkbox", () => {
     name: "I agree to Terms and Conditions",
   });
 
-  fireEvent.click(agreeCheck);
+  await user.click(agreeCheck);
   expect(agreeCheck).toBeChecked();
   expect(confirmButton).toBeEnabled();
 
-  fireEvent.click(agreeCheck);
+  await user.click(agreeCheck);
   expect(agreeCheck).not.toBeChecked();
   expect(confirmButton).toBeDisabled();
+});
+
+test("popover responds to hover", async () => {
+  const user = userEvent.setup();
+  render(<SummaryForm />);
+
+  //popover starts out hidden
+  const nullPopover = screen.queryByText(
+    /no ice cream will actually be delivered/i
+  );
+  expect(nullPopover).not.toBeInTheDocument();
+
+  //popover appears on mouseover of checkbox label
+  const termsAndConditions = screen.getByText(/terms and conditions/i);
+  await user.hover(termsAndConditions);
+  const popover = screen.getByText(/no ice cream will actually be delivered/i);
+  expect(popover).toBeInTheDocument();
+
+  //popover disappears when we check out
+  await user.unhover(termsAndConditions);
+  expect(popover).not.toBeInTheDocument();
 });
