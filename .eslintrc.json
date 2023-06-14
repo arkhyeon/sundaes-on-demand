@@ -12,6 +12,6 @@
   "settings": { "react": { "version": "18.2" } },
   "plugins": ["testing-library", "jest-dom"],
   "rules": {
-    "react-refresh/only-export-components": "warn"
+    "no-use-before-define": "off"
   }
 }
