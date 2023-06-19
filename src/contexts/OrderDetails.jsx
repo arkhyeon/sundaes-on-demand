@@ -1,5 +1,4 @@
 import { createContext, useContext, useState } from "react";
-import { validateModulesOption } from "@babel/preset-env/lib/normalize-options";
 import { pricePerItem } from "../constants";
 
 const OrderDetails = createContext();

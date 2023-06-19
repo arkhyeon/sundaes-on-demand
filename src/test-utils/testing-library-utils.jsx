@@ -1,4 +1,4 @@
-import { OrderDetailsProvider } from "../contexts/OrederDetails";
+import { OrderDetailsProvider } from "../contexts/OrderDetails";
 import { render } from "@testing-library/react";
 
 const renderWithContext = (ui, options) =>

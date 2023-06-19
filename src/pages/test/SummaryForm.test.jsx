@@ -1,6 +1,7 @@
 import SummaryForm from "../summary/SummaryForm";
-import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { render, screen } from "../../test-utils/testing-library-utils";
+import { waitFor } from "@testing-library/react";
 
 test("initial conditions", () => {
   render(<SummaryForm />);
@@ -37,19 +38,21 @@ test("popover responds to hover", async () => {
   const user = userEvent.setup();
   render(<SummaryForm />);
 
-  //popover starts out hidden
+  // popover starts out hidden
   const nullPopover = screen.queryByText(
     /no ice cream will actually be delivered/i
   );
   expect(nullPopover).not.toBeInTheDocument();
 
-  //popover appears on mouseover of checkbox label
+  // popover appears on mouseover of checkbox label
   const termsAndConditions = screen.getByText(/terms and conditions/i);
   await user.hover(termsAndConditions);
   const popover = screen.getByText(/no ice cream will actually be delivered/i);
   expect(popover).toBeInTheDocument();
 
-  //popover disappears when we check out
+  // popover disappears when we mouse out
   await user.unhover(termsAndConditions);
-  expect(popover).not.toBeInTheDocument();
+  await waitFor(() => {
+    expect(popover).not.toBeInTheDocument();
+  });
 });

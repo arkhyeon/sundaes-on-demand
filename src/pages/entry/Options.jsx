@@ -1,28 +1,40 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Row from "react-bootstrap/Row";
 import ScoopOption from "./ScoopOption";
 import ToppingOption from "./ToppingOption";
 import AlertBanner from "../common/AlertBanner";
-import { Row } from "react-bootstrap";
 import { pricePerItem } from "../../constants";
-import { formatCurrency } from "../../utilitues";
-import { useOrderDetails } from "../../contexts/OrederDetails";
+import { formatCurrency } from "../../utilities";
+import { useOrderDetails } from "../../contexts/OrderDetails";
 
-function Options({ optionType }) {
+export default function Options({ optionType }) {
   const [items, setItems] = useState([]);
   const [error, setError] = useState(false);
   const { totals } = useOrderDetails();
 
   useEffect(() => {
+    // create an abortController to attach to the network request
+    const controller = new AbortController();
     axios
-      .get(`http://localhost:3030/${optionType}`)
-      .then((res) => {
-        setItems(res.data);
+      // attach abortController to request
+      .get(`http://localhost:3030/${optionType}`, {
+        signal: controller.signal,
       })
-      .catch((err) => setError(true));
+      .then((response) => setItems(response.data))
+      .catch((error) => {
+        if (error.name !== "CanceledError") {
+          setError(true);
+        }
+      });
+    return () => {
+      // on unmount, abort any active requests
+      controller.abort();
+    };
   }, [optionType]);
 
   if (error) {
+    // @ts-ignore
     return <AlertBanner />;
   }
 
@@ -48,5 +60,3 @@ function Options({ optionType }) {
     </>
   );
 }
-
-export default Options;
