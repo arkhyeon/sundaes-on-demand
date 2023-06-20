@@ -2,7 +2,6 @@ import { render, screen } from "../../../test-utils/testing-library-utils";
 import userEvent from "@testing-library/user-event";
 import Options from "../Options";
 import OrderEntry from "../OrderEntry";
-import { logRoles } from "@testing-library/react";
 
 // scoops 는 Options 컴포넌트 내에 있기에 최소한의 컴포넌트 만을 테스트하여 성능을 내도록 하자.
 test("update scoop subtotal when scoops change", async () => {
@@ -58,12 +57,6 @@ test("토핑 수정에 따른 토핑 소계 업데이트 테스트", async () =>
 describe("grand total", () => {
   test("grand total starts at $0.00", async () => {
     const { unmount, container } = render(<OrderEntry />);
-    // screen.debug(screen.getByText("Grand total: $", { exact: false }));
-    logRoles(
-      await screen.findByRole("spinbutton", {
-        name: "Vanilla",
-      })
-    );
 
     const grandTotal = screen.getByText("Grand total: $", { exact: false });
     expect(grandTotal).toHaveTextContent("0.00");
