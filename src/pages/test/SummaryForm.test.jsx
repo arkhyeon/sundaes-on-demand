@@ -1,36 +1,56 @@
 import SummaryForm from "../summary/SummaryForm";
 import userEvent from "@testing-library/user-event";
-import { render, screen } from "../../test-utils/testing-library-utils";
-import { waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+} from "../../test-utils/testing-library-utils";
 
-test("initial conditions", () => {
+test.only("initial conditions", async () => {
   render(<SummaryForm />);
+  const user = userEvent.setup();
 
-  const confirmButton = screen.getByRole("button", { name: /confirm order/i });
-  const checkbox = screen.getByRole("checkbox", {
+  const confirmButton = await screen.findByRole("button", {
+    name: /confirm order/i,
+  });
+  const checkbox = await screen.findByRole("checkbox", {
     name: /i agree to terms and conditions/i,
   });
-
   expect(confirmButton).toBeDisabled();
   expect(checkbox).not.toBeChecked();
+
+  user.click(checkbox);
+
+  await waitFor(() => {
+    expect(checkbox).toBeChecked();
+  });
+
+  await waitFor(() => {
+    expect(confirmButton).toBeEnabled();
+  });
 });
 
 test("buttons turns disabled property when toggle checkbox", async () => {
   const user = userEvent.setup();
 
-  render(<SummaryForm />);
+  render(<SummaryForm setOrderPhase={jest.fn()} />);
 
-  const confirmButton = screen.getByRole("button", { name: "Confirm Order" });
-  const agreeCheck = screen.getByRole("checkbox", {
+  const confirmButton = screen.getByRole("button", { name: /Confirm Order/i });
+  const agreeCheck = await screen.findByRole("checkbox", {
     name: "I agree to Terms and Conditions",
   });
 
   await user.click(agreeCheck);
-  expect(agreeCheck).toBeChecked();
+  await waitFor(() => {
+    expect(agreeCheck).toBeChecked();
+  });
+
   expect(confirmButton).toBeEnabled();
 
   await user.click(agreeCheck);
-  expect(agreeCheck).not.toBeChecked();
+  await waitFor(() => {
+    expect(agreeCheck).not.toBeChecked();
+  });
   expect(confirmButton).toBeDisabled();
 });
 

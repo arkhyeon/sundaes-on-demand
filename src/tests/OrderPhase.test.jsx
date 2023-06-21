@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import App from "../App";
 
 test("order phases for happy path", async () => {
@@ -97,4 +97,56 @@ test("order phases for happy path", async () => {
   // do we need to await anything to avoid test errors
 
   unmount();
+});
+
+test.only("토핑 미선택 시 토핑 헤더가 나오지 않는지 테스트", async () => {
+  const user = userEvent.setup();
+  render(<App />);
+
+  const vanillaInput = await screen.findByRole("spinbutton", {
+    name: "Vanilla",
+  });
+  await user.clear(vanillaInput);
+  await user.type(vanillaInput, "2");
+
+  const orderButton = screen.getByRole("button", { name: /order sundae/i });
+
+  await user.click(orderButton);
+
+  const toppingsHeader = screen.queryByRole("heading", { name: /toppings/i });
+
+  expect(toppingsHeader).not.toBeInTheDocument();
+});
+
+test.only("토핑 선택 후 제거했을 때 토핑 헤더가 나오지 않는지 테스트", async () => {
+  const user = userEvent.setup();
+  render(<App />);
+
+  const vanillaInput = await screen.findByRole("spinbutton", {
+    name: "Vanilla",
+  });
+
+  await user.clear(vanillaInput);
+  await user.type(vanillaInput, "2");
+
+  const cherriesTopping = await screen.findByRole("checkbox", {
+    name: "Cherries",
+  });
+  const mnmsTopping = await screen.findByRole("checkbox", { name: "M&Ms" });
+
+  await user.click(cherriesTopping);
+  await user.click(mnmsTopping);
+
+  await user.click(cherriesTopping);
+  await user.click(mnmsTopping);
+
+  const orderButton = screen.getByRole("button", { name: /order sundae/i });
+
+  await user.click(orderButton);
+
+  const scoopsHeader = screen.queryByRole("heading", { name: /scoops/i });
+  const toppingsHeader = screen.queryByRole("heading", { name: /toppings/i });
+
+  expect(toppingsHeader).not.toBeInTheDocument();
+  expect(scoopsHeader).toBeInTheDocument();
 });
